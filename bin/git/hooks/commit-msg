@@ -1,0 +1,30 @@
+#!/bin/sh
+
+
+# This hook verifies that the commit message contains a reference to a tfs item
+
+protected_branch='master'
+
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+if [[ $current_branch == $protected_branch ]]; then 
+   echo "$current_branch branch is protected, running status checks.....";
+   
+
+RED=$(tput setaf 1)
+NORMAL=$(tput sgr0)
+# Regex to validate a string contains "#" followed by 4 or 5 digits anywhere in the commit message
+                                            
+#regex="#[0-9]{4,5}($|[^0-9])"
+regex='^(Fixed|Commit|New)[:].*$'
+file=`cat $1` # The file that contains the commit message
+
+# If the commit message does not match the regex
+if ! [[ $file =~ $regex ]]; then
+  echo "${RED}ERROR - Invalid commit message format .$NORMAL"
+  exit 1
+else
+  echo "Commit message approved";fi
+else echo "branch is not protected, skipping status checks....";
+fi
+exit 0
